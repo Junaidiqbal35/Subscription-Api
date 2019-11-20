@@ -8,13 +8,25 @@ class MembershipSerializer(serializers.ModelSerializer):
         fields = ('id', 'slug', 'membership_type', 'price')
 
 
-class UserMembershipSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserMembership
-        fields = ('user', 'membership')
-
-
 class SubscriptionSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Subscription
-        fields = ('user_membership',)
+        fields = ('created_at',)
+
+
+class UserMembershipSerializer(serializers.ModelSerializer):
+    plan = SubscriptionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = UserMembership
+        fields = ('user', 'membership', 'plan')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['user'] = instance.user.username
+        data['membership'] = instance.membership.membership_type
+        return data
+
+
+

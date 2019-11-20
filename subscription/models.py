@@ -42,7 +42,7 @@ class UserMembership(models.Model):
 
 
 class Subscription(models.Model):
-    user_membership = models.ForeignKey(UserMembership, on_delete=models.CASCADE)
+    user_membership = models.ForeignKey(UserMembership,related_name='plan', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     active = models.BooleanField(default=True)

@@ -33,5 +33,3 @@ class UserMembershipView(ListAPIView):
 class SubscriptionView(ListAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
-    filter_backends = DjangoFilterBackend
-    filter_fields = ('id',)
