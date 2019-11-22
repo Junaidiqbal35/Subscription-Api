@@ -8,7 +8,7 @@ admin.site.register(UserMembership)
 
 
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('user_membership', 'user_membership_type', 'active', 'email', 'created_at')
+    list_display = ('user_membership', 'user_membership_type', 'active', 'email', 'created_at','updated', 'expired_at')
     #list_display_links = ('user_membership',)
     #search_fields = ('user_membership',)
     list_per_page = 25

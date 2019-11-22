@@ -3,5 +3,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('subscription/', include('subscription.urls'))
+    path('api/subscription/', include('subscription.urls', namespace='subscription'))
 ]
