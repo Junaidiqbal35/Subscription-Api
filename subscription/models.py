@@ -9,9 +9,13 @@ from rest_framework.reverse import reverse as api_reverse
 from django.utils import timezone
 
 MEMBERSHIP_CHOICES = (
-    ('Enterprise', 'ent'),
-    ('Professional', 'pro'),
+    ('Enterprise', 'enterprise'),
+    ('Professional', 'professional'),
     ('Free', 'free'),
+)
+Plan_Interval = (
+    ('Monthly', 'month'),
+    ('Yearly', 'yearly'),
 )
 
 
@@ -21,9 +25,16 @@ class Membership(models.Model):
     membership_type = models.CharField(
         verbose_name=_('Membership Type'),
         choices=MEMBERSHIP_CHOICES,
-        default='Free',
+        default=_('Free'),
         max_length=30)
     price = models.FloatField(verbose_name=_("price"))
+    active = models.BooleanField(default=True)
+    interval = models.CharField(
+        verbose_name=_('Plan Period'),
+        choices=Plan_Interval,
+        default=_('Monthly'),
+        max_length=30
+    )
 
     class Meta:
         verbose_name = _('Membership')
@@ -44,10 +55,14 @@ class Membership(models.Model):
 
 class UserMembership(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name=_("User Model"))
-    membership = models.ForeignKey(Membership, on_delete=models.SET_NULL, null=True, verbose_name=_("membership list"))
+    membership = models.ForeignKey(Membership, on_delete=models.SET_NULL, null=True, verbose_name=_("Plan list"))
 
     def __str__(self):
-        return self.user.username
+        return self.membership.membership_type
+
+    class Meta:
+        verbose_name = _('User Membership')
+        verbose_name_plural = _('User Memberships')
 
     def get_api_url(self, request=None):
         return api_reverse('subscription:user-membership', kwargs={'id': self.id}, request=request)
@@ -61,14 +76,18 @@ class Subscription(models.Model):
     user_membership = models.ForeignKey(UserMembership, related_name='plan', on_delete=models.CASCADE,
                                         verbose_name=_("User MemberShip data"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("created_at"))
-    updated = models.DateTimeField(auto_now=True, verbose_name=_("ended_at"))
+    updated = models.DateTimeField(auto_now=True, verbose_name=_("updated_at"))
     active = models.BooleanField(default=True)
-    expired_at = models.DateTimeField(default=get_deadline(), verbose_name=_("ended_at"))
+    expired_at = models.DateTimeField(default=get_deadline(), verbose_name=_("billing_date"))
     """
     def save(self, *args, **kwargs):
         self.expired_at = datetime.datetime.now() + datetime.timedelta(30)
         super(Subscription, self).save(*args, **kwargs)  # Call the "real" save() method
     """
+
+    class Meta:
+        verbose_name = _('Subscription')
+        verbose_name_plural = _('Subscriptions')
 
     @property
     def is_expired(self):
@@ -77,4 +96,4 @@ class Subscription(models.Model):
         return False
 
     def __str__(self):
-        return self.user_membership.user.username
+        return self.user_membership.membership.membership_type
